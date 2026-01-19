@@ -1,0 +1,21 @@
+{
+  "name": "issue-tracker-typespec",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@typespec/compiler": "latest",
+    "@typespec/http": "latest",
+    "@typespec/rest": "latest"
+  },
+  "packageManager": "pnpm@10.18.3",
+  "devDependencies": {
+    "typespec-typescript-emitter": "^2.3.3"
+  },
+  "scripts": {
+    "generate": "tsp compile main.tsp",
+    "generate:types": "tsp compile main.tsp --emit typespec-typescript-emitter",
+    "generate:tinybase": "node scripts/generate-tinybase-schema.js",
+    "clean": "rm -rf ../src/generated/*"
+  }
+}

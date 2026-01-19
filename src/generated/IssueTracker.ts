@@ -20,7 +20,7 @@ export type Issue = {
   id: string,
   title: string,
   description?: string,
-  state: IssueState,
+  status: IssueState,
   priority: number,
   assignee?: string,
   projectId: string,
@@ -32,10 +32,5 @@ export type Project = {
   id: string,
   name: string,
   description?: string
-}
-
-export type Error = {
-  code: number,
-  message: string
 }
 

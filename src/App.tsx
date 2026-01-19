@@ -20,7 +20,7 @@ export const App = () => {
         id: {type: 'string', default: ''},
         title: {type: 'string', default: ''},
         // description: {type: 'string', default: ''},
-        state: {type: 'string', default: 'Backlog'},
+        status: {type: 'string', default: 'Backlog'},
         priority: {type: 'number', default: 0},
         // assignee: {type: 'string', default: ''},
         projectId: {type: 'string', default: ''},
@@ -45,7 +45,7 @@ export const App = () => {
   store.setRow('issue', '1', {
     title: 'some issue',
     id: '1',
-    state: IssueState.Backlog,
+    status: IssueState.Backlog,
     priority: 1,
     created: '2026-01-18',
     // description: 'more stuff'}

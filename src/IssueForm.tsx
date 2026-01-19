@@ -1,5 +1,5 @@
-import {useCallback, useState} from 'react';
-import {useAddRowCallback} from 'tinybase/ui-react';
+import {useCallback, useRef, useState} from 'react';
+import {useStore} from 'tinybase/ui-react';
 import {Button} from './components/ui/button';
 import {Input} from './components/ui/input';
 import {IssueState} from './generated/IssueTracker';
@@ -14,19 +14,35 @@ enum Priority {
 
 export const IssueForm = () => {
   const [title, setTitle] = useState('');
-  const [priority, setPriority] = useState<Priority>(Priority.NONE);
-  const [status, setStatus] = useState<IssueState>(IssueState.Backlog);
+  const priorityRef = useRef<HTMLSelectElement>(null);
+  const statusRef = useRef<HTMLSelectElement>(null);
+  const issueStore = useStore();
 
-  const addIssue = useAddRowCallback(
-    'issue',
-    () => ({ title, status, priority }),
-    [title, status, priority],
-    undefined,
-    (rowId) => {
-      clearFormState();
-      console.log('Issue created:', rowId);
-    },
-  );
+  const addIssue = useCallback(() => {
+    const priorityValue = priorityRef.current?.value || "0";
+    const statusValue = statusRef.current?.value || "Backlog";
+
+    const currentPriority = Number(priorityValue);
+    const currentStatus = statusValue as IssueState;
+
+    console.log('Creating issue with:', {
+      title,
+      status: currentStatus,
+      priority: currentPriority,
+      priorityRefValue: priorityValue,
+      statusRefValue: statusValue
+    });
+
+    // Create issue directly using the store
+    issueStore?.setRow('issue', Date.now().toString(), {
+      title,
+      status: currentStatus,
+      priority: currentPriority,
+      projectId: '0', // Default to first project
+      createdAt: new Date().toISOString()
+    });
+    clearFormState();
+  }, [title, issueStore]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && title.trim() !== '') {
@@ -35,9 +51,9 @@ export const IssueForm = () => {
   };
 
   const clearFormState = () => {
-    setPriority(Priority.NONE);
     setTitle('');
-    setStatus(IssueState.Backlog);
+    if (priorityRef.current) priorityRef.current.value = "0";
+    if (statusRef.current) statusRef.current.value = "Backlog";
   };
 
   const handleTitleChange = useCallback(
@@ -78,15 +94,15 @@ export const IssueForm = () => {
           </label>
           <select
             id="priority"
-            value={priority}
-            onChange={(e) => setPriority(Number(e.target.value) as Priority)}
+            ref={priorityRef}
+            defaultValue={Priority.NONE.toString()}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value={Priority.NONE}>None</option>
-            <option value={Priority.LOW}>Low</option>
-            <option value={Priority.MEDIUM}>Medium</option>
-            <option value={Priority.HIGH}>High</option>
-            <option value={Priority.URGENT}>Urgent</option>
+            <option value="0">None</option>
+            <option value="1">Low</option>
+            <option value="2">Medium</option>
+            <option value="3">High</option>
+            <option value="4">Urgent</option>
           </select>
         </div>
 
@@ -96,15 +112,15 @@ export const IssueForm = () => {
           </label>
           <select
             id="status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as IssueState)}
+            ref={statusRef}
+            defaultValue={IssueState.Backlog}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value={IssueState.Backlog}>Backlog</option>
-            <option value={IssueState.Todo}>Todo</option>
-            <option value={IssueState.InProgress}>In Progress</option>
-            <option value={IssueState.Done}>Done</option>
-            <option value={IssueState.Cancelled}>Cancelled</option>
+            <option value="Backlog">Backlog</option>
+            <option value="Todo">Todo</option>
+            <option value="InProgress">In Progress</option>
+            <option value="Done">Done</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
       </div>

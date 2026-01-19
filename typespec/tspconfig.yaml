@@ -1,0 +1,17 @@
+emit:
+  - 'typespec-typescript-emitter'
+  - './emitters/tinybase-emitter.ts'
+  - './emitters/tinybase-template-emitter.ts'
+options:
+  'typespec-typescript-emitter':
+    root-namespaces:
+      - 'IssueTracker'
+    out-dir: '{cwd}/../src/generated'
+    enable-types: true
+    enable-typeguards: false
+    enable-routes: false
+    enable-routed-typemap: false
+    enable-routed-path-params: false
+    import-file-extensions: false
+    string-nominal-enums: false
+    serializable-date-types: false
