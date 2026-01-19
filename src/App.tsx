@@ -57,10 +57,7 @@ export const App = () => {
     <StrictMode>
       <Provider store={store}>
         <header>
-          <h1>
-            <img src="/favicon.svg" />
-            Issue Tracker
-          </h1>
+          <h1>Issue Tracker</h1>
         </header>
         <Buttons />
         <div>

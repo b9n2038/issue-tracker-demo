@@ -1,9 +1,9 @@
-import {Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
+import {Popover, PopoverButton, PopoverPanel} from '@components/ui/popover';
 import {IssueState} from '../generated/IssueTracker';
 import StatusContexMenu from './StatusContextMenu';
 
 interface StatusSelectorProps {
-  state: keyof IssueState;
+  status: keyof IssueState;
   onSelect?: (status: keyof IssueState) => void;
 }
 
@@ -13,7 +13,7 @@ export default function StatusSelector({
 }: StatusSelectorProps) {
   return (
     <Popover className="relative">
-      <PopoverButton>{status}</PopoverButton>
+      <PopoverButton aria-label="Select status">Trigger {status}</PopoverButton>
       <PopoverPanel>
         <StatusContexMenu id={status} onSelect={onSelect} />
       </PopoverPanel>

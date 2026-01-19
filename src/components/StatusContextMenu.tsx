@@ -1,9 +1,8 @@
-import {Select} from '@headlessui/react';
-import {useState} from 'react';
+import {Select} from '@components/ui/select';
 import {IssueState} from '../generated/IssueTracker';
 
 interface StatusContextMenuProps {
-  id: string;
+  selectedStatus: string;
   className?: string;
   onSelect?: (item: any) => void;
 }
@@ -13,20 +12,23 @@ const states = Object.keys(IssueState);
 //onClick, open,
 //onSelect choose and callback
 export default function StatusContexMenu({
-  id,
+  selectedStatus,
   className,
   onSelect,
 }: StatusContextMenuProps) {
-  let [selected, setSelected] = useState(id);
-
-  const handleSelected = (id) => {
-    setSelected(id);
+  const handleSelected = (id: string) => {
     onSelect && onSelect(id);
   };
   return (
-    <Select name="status" aria-label="Issue status" onSelect={handleSelected}>
+    <Select name="status" aria-label="Issue status">
       {states.map((status) => (
-        <option value="{status}">{status}</option>
+        <option
+          value="{status}"
+          aria-checked={selectedStatus == status}
+          onClick={handleSelected}
+        >
+          {status}
+        </option>
       ))}
     </Select>
   );

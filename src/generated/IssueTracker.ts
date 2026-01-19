@@ -8,11 +8,11 @@
  */
 
 export enum IssueState {
-  Backlog,
-  Todo,
-  InProgress,
-  Done,
-  Cancelled,
+  Backlog = 'Backlog',
+  Todo = 'Todo',
+  InProgress = 'InProgress',
+  Done = 'Done',
+  Cancelled = 'Cancelled',
 }
 
 export type Issue = {

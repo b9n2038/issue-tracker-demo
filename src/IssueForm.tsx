@@ -1,6 +1,6 @@
 import {useCallback, useRef, useState} from 'react';
 import {useAddRowCallback, useStore} from 'tinybase/ui-react';
-import StatusSelector from './components/StatusSelector';
+import StatusContexMenu from './components/StatusContextMenu';
 import {Issue, IssueState} from './generated/IssueTracker';
 
 enum IssueFormMode {
@@ -76,6 +76,7 @@ export const IssueForm = ({
   return (
     <div className="issue__create">
       <input
+        name="title"
         placeholder="Issue title"
         value={title}
         // ref={ref}
@@ -83,6 +84,7 @@ export const IssueForm = ({
         onKeyDown={handleKeyDown}
       />
       <input
+        name="priority"
         value={priority}
         type="number"
         min="0"
@@ -90,7 +92,7 @@ export const IssueForm = ({
         maxLength={1}
         onChange={(e) => setPriority(e.target.value)}
       />
-      <StatusSelector state={status} onSelect={setStatus} />
+      <StatusContexMenu selectedStatus={status} onSelect={setStatus} />
     </div>
   );
 };
