@@ -121,3 +121,35 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Tinybase Table Styles */
+  .sortedTable {
+    @apply w-full border-collapse;
+  }
+
+  .sortedTable th {
+    @apply bg-muted px-4 py-3 text-left text-sm font-medium text-muted-foreground border-b;
+  }
+
+  .sortedTable td {
+    @apply px-4 py-3 text-sm border-b border-border/50;
+  }
+
+  .sortedTable tr:hover {
+    @apply bg-muted/50;
+  }
+
+  /* Pagination styles */
+  .sortedTable .paginator {
+    @apply flex justify-center items-center gap-2 mt-4;
+  }
+
+  .sortedTable .paginator button {
+    @apply px-3 py-1 text-sm border border-border rounded-md bg-background hover:bg-accent hover:text-accent-foreground transition-colors;
+  }
+
+  .sortedTable .paginator button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}

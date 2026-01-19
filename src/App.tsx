@@ -1,13 +1,10 @@
 import {StrictMode} from 'react';
 import {Provider, useCreateStore} from 'tinybase/ui-react';
 import {SortedTableInHtmlTable} from 'tinybase/ui-react-dom';
-import {Inspector} from 'tinybase/ui-react-inspector';
 import {createStore} from 'tinybase/with-schemas';
 import {Buttons} from './Buttons';
 import {IssueState} from './generated/IssueTracker';
 import {IssueForm} from './IssueForm';
-
-const IssueStates = Object.keys(IssueState);
 export const App = () => {
   const store = useCreateStore(() => {
     // Create the TinyBase Store and initialize the Store's data
@@ -15,22 +12,22 @@ export const App = () => {
     //OPP: tinybase jsonschema
     return createStore().setTablesSchema({
       project: {
-        id: {type: 'string'},
-        name: {type: 'string'},
-        description: {type: 'string'},
+        id: {type: 'string', default: ''},
+        name: {type: 'string', default: ''},
+        description: {type: 'string', default: ''},
       },
       issue: {
-        id: {type: 'string'},
-        title: {type: 'string'},
-        // description: {type: 'string'},
-        state: {type: 'string'},
-        priority: {type: 'number'},
-        // assignee: {type: 'string'},
-        projectId: {type: 'string'},
-        createdAt: {type: 'string'},
-        // updatedAt: {type: 'string'},
+        id: {type: 'string', default: ''},
+        title: {type: 'string', default: ''},
+        // description: {type: 'string', default: ''},
+        state: {type: 'string', default: 'Backlog'},
+        priority: {type: 'number', default: 0},
+        // assignee: {type: 'string', default: ''},
+        projectId: {type: 'string', default: ''},
+        createdAt: {type: 'string', default: ''},
+        // updatedAt: {type: 'string', default: ''},
       },
-    });
+    }) as any;
   });
 
   store.setRow('project', '0', {
@@ -56,37 +53,56 @@ export const App = () => {
   return (
     <StrictMode>
       <Provider store={store}>
-        <header>
-          <h1>Issue Tracker</h1>
-        </header>
-        <Buttons />
-        <div>
-          <h2>Issue Table</h2>
-          <SortedTableInHtmlTable
-            tableId="issue"
-            cellId="title"
-            limit={5}
-            sortOnClick={true}
-            className="sortedTable"
-            paginator={true}
-          />
+        <div className="min-h-screen bg-background">
+          <header className="border-b bg-card">
+            <div className="container mx-auto px-4 py-6">
+              <h1 className="text-3xl font-bold text-foreground">Issue Tracker</h1>
+            </div>
+          </header>
+
+          <main className="container mx-auto px-4 py-8 space-y-8">
+            <section className="flex justify-center">
+              <Buttons />
+            </section>
+
+            <div className="grid gap-8 lg:grid-cols-2">
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold text-foreground">Issues</h2>
+                <div className="bg-card rounded-lg border p-6">
+                  <SortedTableInHtmlTable
+                    tableId="issue"
+                    cellId="title"
+                    limit={5}
+                    sortOnClick={true}
+                    className="w-full"
+                    paginator={true}
+                  />
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold text-foreground">Create New Issue</h2>
+                <div className="bg-card rounded-lg border p-6">
+                  <IssueForm />
+                </div>
+              </section>
+            </div>
+
+            <section className="space-y-4">
+              <h2 className="text-2xl font-semibold text-foreground">Projects</h2>
+              <div className="bg-card rounded-lg border p-6">
+                <SortedTableInHtmlTable
+                  tableId="project"
+                  cellId="title"
+                  limit={5}
+                  sortOnClick={true}
+                  className="w-full"
+                  paginator={true}
+                />
+              </div>
+            </section>
+          </main>
         </div>
-        <div>
-          <h2>New Issue</h2>
-          <IssueForm isOpen={true} />
-        </div>
-        <div>
-          <h2>Project Table</h2>
-          <SortedTableInHtmlTable
-            tableId="project"
-            cellId="title"
-            limit={5}
-            sortOnClick={true}
-            className="sortedTable"
-            paginator={true}
-          />
-        </div>
-        <Inspector />
       </Provider>
     </StrictMode>
   );

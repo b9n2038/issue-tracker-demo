@@ -1,4 +1,4 @@
-import {Button} from '@components/ui/button';
+import {Button} from './components/ui/button';
 import {useAddRowCallback} from 'tinybase/ui-react';
 import {IssueState} from './generated/IssueTracker';
 // Convenience function for generating a random integer
@@ -19,8 +19,10 @@ export const Buttons = () => {
   }));
 
   return (
-    <div id="buttons">
-      <Button onClick={handleAddIssue}>Add a issue</Button>
+    <div className="flex gap-4">
+      <Button onClick={handleAddIssue} className="px-6">
+        Add Random Issue
+      </Button>
     </div>
   );
 };

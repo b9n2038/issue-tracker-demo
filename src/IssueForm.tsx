@@ -1,98 +1,126 @@
-import {useCallback, useRef, useState} from 'react';
-import {useAddRowCallback, useStore} from 'tinybase/ui-react';
-import StatusContexMenu from './components/StatusContextMenu';
-import {Issue, IssueState} from './generated/IssueTracker';
-
-enum IssueFormMode {
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-}
-interface IssueFormProps {
-  isOpen: boolean;
-  onDismiss?: () => void;
-  mode?: IssueFormMode;
-  inputValues?: Partial<Issue>;
-}
+import {useCallback, useState} from 'react';
+import {useAddRowCallback} from 'tinybase/ui-react';
+import {Button} from './components/ui/button';
+import {Input} from './components/ui/input';
+import {IssueState} from './generated/IssueTracker';
 
 enum Priority {
-  NONE,
-  URGENT,
-  HIGH,
-  MEDIUM,
-  LOW,
+  NONE = 0,
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+  URGENT = 4,
 }
 
-export const IssueForm = ({
-  isOpen,
-  onDismiss,
-  mode = IssueFormMode.CREATE,
-}: IssueFormProps) => {
-  const ref = useRef<HTMLInputElement>(null);
+export const IssueForm = () => {
   const [title, setTitle] = useState('');
-  // const [description, setDescription] = useState(''); //rich text
-  const [priority, setPriority] = useState(Priority.NONE);
-  const [status, setStatus] = useState(IssueState.Backlog);
-  //labels
+  const [priority, setPriority] = useState<Priority>(Priority.NONE);
+  const [status, setStatus] = useState<IssueState>(IssueState.Backlog);
 
-  const issueStore = useStore();
-
-  const listenerId = issueStore?.addRowListener(
+  const addIssue = useAddRowCallback(
     'issue',
-    null,
-    (store, tableId, rowId) => {
-      console.log(`${rowId} row in ${tableId} table changed`);
+    () => ({ title, status, priority }),
+    [title, status, priority],
+    undefined,
+    (rowId) => {
+      clearFormState();
+      console.log('Issue created:', rowId);
     },
   );
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && title.trim() !== '') {
+      addIssue();
+    }
+  };
+
   const clearFormState = () => {
-    setPriority(0);
+    setPriority(Priority.NONE);
     setTitle('');
     setStatus(IssueState.Backlog);
   };
-  // const type = useValue('type', 'viewStore')
+
   const handleTitleChange = useCallback(
-    ({target: {value}}) => setTitle(value),
+    (event: React.ChangeEvent<HTMLInputElement>) => setTitle(event.target.value),
     [],
   );
 
-  const handleKeyDown = useAddRowCallback(
-    'issue',
-    ({which, target: {value: title}}, store) =>
-      which == 13 && title != '' ? {title, status, priority} : undefined,
-    [setTitle],
-    undefined,
-    (rowId, _, row) => {
-      clearFormState();
-      console.log('interesting, fires once', rowId, row['title']);
-    },
-  );
 
-  const handleSubmit = () => {
-    //do validation
-    //createUssue
-    //clearState
-    //Dodismiss
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (title.trim()) {
+      addIssue();
+    }
   };
 
   return (
-    <div className="issue__create">
-      <input
-        name="title"
-        placeholder="Issue title"
-        value={title}
-        // ref={ref}
-        onChange={handleTitleChange}
-        onKeyDown={handleKeyDown}
-      />
-      <input
-        name="priority"
-        value={priority}
-        type="number"
-        min="0"
-        max="4"
-        maxLength={1}
-        onChange={(e) => setPriority(e.target.value)}
-      />
-      <StatusContexMenu selectedStatus={status} onSelect={setStatus} />
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <label htmlFor="title" className="text-sm font-medium text-foreground">
+          Issue Title
+        </label>
+        <Input
+          id="title"
+          name="title"
+          type="text"
+          placeholder="Enter issue title..."
+          value={title}
+          onChange={handleTitleChange}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="priority" className="text-sm font-medium text-foreground">
+            Priority
+          </label>
+          <select
+            id="priority"
+            value={priority}
+            onChange={(e) => setPriority(Number(e.target.value) as Priority)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value={Priority.NONE}>None</option>
+            <option value={Priority.LOW}>Low</option>
+            <option value={Priority.MEDIUM}>Medium</option>
+            <option value={Priority.HIGH}>High</option>
+            <option value={Priority.URGENT}>Urgent</option>
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="status" className="text-sm font-medium text-foreground">
+            Status
+          </label>
+          <select
+            id="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as IssueState)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value={IssueState.Backlog}>Backlog</option>
+            <option value={IssueState.Todo}>Todo</option>
+            <option value={IssueState.InProgress}>In Progress</option>
+            <option value={IssueState.Done}>Done</option>
+            <option value={IssueState.Cancelled}>Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <Button type="submit" disabled={!title.trim()}>
+          Create Issue
+        </Button>
+        <Button type="button" variant="outline" onClick={clearFormState}>
+          Clear
+        </Button>
+      </div>
+
+      <div className="text-xs text-muted-foreground">
+        Press Enter in the title field or click "Create Issue" to add the issue
+      </div>
+    </form>
   );
 };

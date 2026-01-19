@@ -1,10 +1,8 @@
-import {Popover, PopoverButton, PopoverPanel} from '@components/ui/popover';
 import {IssueState} from '../generated/IssueTracker';
-import StatusContexMenu from './StatusContextMenu';
 
 interface StatusSelectorProps {
-  status: keyof IssueState;
-  onSelect?: (status: keyof IssueState) => void;
+  status: IssueState;
+  onSelect?: (status: IssueState) => void;
 }
 
 export default function StatusSelector({
@@ -12,11 +10,16 @@ export default function StatusSelector({
   onSelect,
 }: StatusSelectorProps) {
   return (
-    <Popover className="relative">
-      <PopoverButton aria-label="Select status">Trigger {status}</PopoverButton>
-      <PopoverPanel>
-        <StatusContexMenu id={status} onSelect={onSelect} />
-      </PopoverPanel>
-    </Popover>
+    <select
+      value={status}
+      onChange={(e) => onSelect?.(e.target.value as IssueState)}
+      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <option value={IssueState.Backlog}>Backlog</option>
+      <option value={IssueState.Todo}>Todo</option>
+      <option value={IssueState.InProgress}>In Progress</option>
+      <option value={IssueState.Done}>Done</option>
+      <option value={IssueState.Cancelled}>Cancelled</option>
+    </select>
   );
 }
