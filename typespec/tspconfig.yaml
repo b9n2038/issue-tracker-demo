@@ -1,7 +1,7 @@
 emit:
   - 'typespec-typescript-emitter'
-  - './emitters/tinybase-emitter.ts'
-  - './emitters/tinybase-template-emitter.ts'
+  - 'tinybase-emitter'
+  - 'tinybase-template-emitter'
 options:
   'typespec-typescript-emitter':
     root-namespaces:
@@ -15,3 +15,7 @@ options:
     import-file-extensions: false
     string-nominal-enums: false
     serializable-date-types: false
+  'tinybase-emitter':
+    output-dir: '{cwd}/../src/generated'
+  'tinybase-template-emitter':
+    output-dir: '{cwd}/../src/generated'

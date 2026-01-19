@@ -16,6 +16,8 @@
     "generate": "tsp compile main.tsp",
     "generate:types": "tsp compile main.tsp --emit typespec-typescript-emitter",
     "generate:tinybase": "node scripts/generate-tinybase-schema.js",
+    "generate:effect": "node scripts/generate-effect-schema.js",
+    "generate:all": "npm run generate:types && npm run generate:tinybase && npm run generate:effect",
     "clean": "rm -rf ../src/generated/*"
   }
 }

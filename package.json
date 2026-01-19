@@ -8,6 +8,9 @@
     "preview": "vite preview",
     "generate": "cd typespec && pnpm generate",
     "generate:types": "cd typespec && pnpm generate:types",
+    "generate:tinybase": "cd typespec && pnpm generate:tinybase",
+    "generate:effect": "cd typespec && pnpm generate:effect",
+    "generate:all": "cd typespec && pnpm generate:all",
     "clean:types": "cd typespec && pnpm clean"
   },
   "devDependencies": {
