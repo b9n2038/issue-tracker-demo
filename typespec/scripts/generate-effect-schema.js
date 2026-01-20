@@ -103,7 +103,7 @@ function generateEffectSchema(content) {
   let effectCode = `// Auto-generated Effect Schema from TypeSpec
 // This provides runtime validation and type safety
 
-import { Schema as S } from '@effect/schema/Schema';
+import { Schema as S } from 'effect';
 
 // Enum Schemas
 `;

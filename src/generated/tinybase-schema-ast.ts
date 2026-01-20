@@ -1,59 +1,33 @@
-// Auto-generated Tinybase schema from TypeSpec (AST-based approach)
-// This uses TypeScript AST parsing to extract schema information
+// Auto-generated Tinybase schema from TypeSpec (Template-based approach)
+// This uses string templates to generate schema definitions
 
-export const tinybaseSchemaAST = {
-  "issue": {
-    "title": {
-      "type": "string",
-      "default": "\"\""
-    },
-    "description": {
-      "type": "string",
-      "default": "\"\""
-    },
-    "status": {
-      "type": "string",
-      "default": "\"\""
-    },
-    "priority": {
-      "type": "number",
-      "default": "0"
-    },
-    "assignee": {
-      "type": "string",
-      "default": "\"\""
-    },
-    "projectId": {
-      "type": "string",
-      "default": "\"\""
-    },
-    "createdAt": {
-      "type": "string",
-      "default": "\"\""
-    },
-    "updatedAt": {
-      "type": "string",
-      "default": "\"\""
-    }
-  },
-  "project": {
-    "name": {
-      "type": "string",
-      "default": "\"\""
-    },
-    "description": {
-      "type": "string",
-      "default": "\"\""
-    }
-  }
+export const issueSchema = {
+  title: { type: "string", default: "" },
+  description: { type: "string", default: "" },
+  status: { type: "string", default: "Backlog" },
+  priority: { type: "number", default: 0 },
+  assignee: { type: "string", default: "" },
+  projectId: { type: "string", default: "" },
+  createdAt: { type: "string", default: "" },
+  updatedAt: { type: "string", default: "" },
+} as const;
+
+export const projectSchema = {
+  name: { type: "string", default: "" },
+  description: { type: "string", default: "" },
+} as const;
+
+export const tinybaseSchemaTemplate = {
+  issue: issueSchema,
+  project: projectSchema,
 } as const;
 
 // Type-safe schema access
-export type TinybaseSchemaAST = typeof tinybaseSchemaAST;
+export type TinybaseSchemaTemplate = typeof tinybaseSchemaTemplate;
 
 // Helper function to create Tinybase store configuration
-export function createTinybaseConfigAST() {
+export function createTinybaseConfigTemplate() {
   return {
-    tables: tinybaseSchemaAST
+    tables: tinybaseSchemaTemplate
   };
 }

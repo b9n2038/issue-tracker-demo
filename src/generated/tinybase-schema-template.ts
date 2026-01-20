@@ -4,7 +4,7 @@
 export const issueSchema = {
   title: { type: "string", default: "" },
   description: { type: "string", default: "" },
-  status: { type: "string", default: "" },
+  status: { type: "string", default: "Backlog" },
   priority: { type: "number", default: 0 },
   assignee: { type: "string", default: "" },
   projectId: { type: "string", default: "" },
@@ -18,8 +18,8 @@ export const projectSchema = {
 } as const;
 
 export const tinybaseSchemaTemplate = {
-  issue,
-  project
+  issue: issueSchema,
+  project: projectSchema,
 } as const;
 
 // Type-safe schema access

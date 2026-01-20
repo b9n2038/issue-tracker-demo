@@ -1,7 +1,7 @@
 // Auto-generated Effect Schema from TypeSpec
 // This provides runtime validation and type safety
 
-import { Schema as S } from '@effect/schema/Schema';
+import { Schema as S } from 'effect';
 
 // Enum Schemas
 export const IssueStateSchema = S.Union(S.Literal("Backlog"), S.Literal("Todo"), S.Literal("InProgress"), S.Literal("Done"), S.Literal("Cancelled"));
