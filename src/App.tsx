@@ -1,59 +1,45 @@
 import {StrictMode, useState} from 'react';
 import {Provider, useCreateStore} from 'tinybase/ui-react';
 import {createStore} from 'tinybase/with-schemas';
-import {Buttons} from './Buttons';
 import {DataTable} from './components/DataTable';
 import {AppSidebar, AppHeader, NewIssueModal, SearchModal} from './components/AppSidebar';
-import {SidebarProvider, SidebarInset} from './components/ui/sidebar';
+import {SidebarProvider, SidebarInset, useSidebar} from './components/ui/sidebar';
 import {ThemeProvider} from './hooks/use-theme';
 import {IssueState} from './generated/IssueTracker';
-import {IssueForm} from './IssueForm';
-export const App = () => {
-  const store = useCreateStore(() => {
-    // Create the TinyBase Store and initialize the Store's data
 
-    //OPP: tinybase jsonschema
-    return createStore().setTablesSchema({
-      project: {
-        id: {type: 'string', default: ''},
-        name: {type: 'string', default: ''},
-        description: {type: 'string', default: ''},
-      },
-      issue: {
-        id: {type: 'string', default: ''},
-        title: {type: 'string', default: ''},
-        // description: {type: 'string', default: ''},
-        status: {type: 'string', default: 'Backlog'},
-        priority: {type: 'number', default: 0},
-        // assignee: {type: 'string', default: ''},
-        projectId: {type: 'string', default: ''},
-        createdAt: {type: 'string', default: ''},
-        // updatedAt: {type: 'string', default: ''},
-      },
-    }) as any;
-  });
+// Generate random issues for demo purposes
+const generateRandomIssues = (store: any) => {
+  const statuses = [IssueState.Backlog, IssueState.Todo, IssueState.InProgress, IssueState.Done, IssueState.Cancelled];
+  const priorities = [0, 1, 2, 3, 4]; // 0-4
+  const titles = [
+    'Implement user authentication', 'Fix responsive design on mobile', 'Add dark mode support',
+    'Optimize database queries', 'Create API documentation', 'Setup CI/CD pipeline',
+    'Implement search functionality', 'Add unit tests', 'Refactor legacy code',
+    'Improve error handling', 'Add data validation', 'Create user dashboard',
+    'Implement notification system', 'Add file upload feature', 'Create admin panel',
+    'Optimize bundle size', 'Add accessibility features', 'Implement caching',
+    'Create data export functionality', 'Add real-time updates', 'Implement pagination',
+    'Add drag and drop support', 'Create user onboarding', 'Implement multi-language support',
+    'Add keyboard shortcuts', 'Create custom themes'
+  ];
 
-  store.setRow('project', '0', {
-    title: 'issue-tracker',
-    id: '0',
-    description: 'Default issue-tracker',
-  });
+  for (let i = 0; i < 25; i++) {
+    const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+    const randomPriority = priorities[Math.floor(Math.random() * priorities.length)];
 
-  store.setRow('project', '1', {
-    title: 'linear-cline',
-    id: '1',
-    description: 'Linear clone project',
-  });
+    store.setRow('issue', `issue-${i + 1}`, {
+      title: `${randomTitle} ${i + 1}`,
+      status: randomStatus,
+      priority: randomPriority,
+      projectId: '0', // Default to first project
+      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last 30 days
+    });
+  }
+};
 
-  store.setRow('issue', '1', {
-    title: 'some issue',
-    id: '1',
-    status: IssueState.Backlog,
-    priority: 1,
-    created: '2026-01-18',
-    // description: 'more stuff'}
-  });
-
+const MainContent = ({ onModalOpen }: { onModalOpen: (modal: string) => void }) => {
+  const { state } = useSidebar();
   const [activeView, setActiveView] = useState('issues');
   const [showNewIssue, setShowNewIssue] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -68,37 +54,23 @@ export const App = () => {
     } else if (modal === 'search') {
       setShowSearch(true);
     }
+    onModalOpen(modal);
   };
 
   const renderMainContent = () => {
     switch (activeView) {
       case 'issues':
         return (
-          <div className="space-y-8">
-            <section className="flex justify-center">
-              <Buttons />
-            </section>
-
-            <div className="grid gap-8 lg:grid-cols-2">
-              <section className="space-y-4">
-                <h2 className="text-2xl font-semibold text-foreground">Issues</h2>
-                <div className="bg-card rounded-lg border p-6">
-                  <DataTable
-                    tableId="issue"
-                    cellId="title"
-                    defaultPageSize={5}
-                  />
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h2 className="text-2xl font-semibold text-foreground">Create New Issue</h2>
-                <div className="bg-card rounded-lg border p-6">
-                  <IssueForm />
-                </div>
-              </section>
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-foreground">Issues</h2>
+            <div className="bg-card rounded-lg border p-6">
+              <DataTable
+                tableId="issue"
+                cellId="title"
+                defaultPageSize={5}
+              />
             </div>
-          </div>
+          </section>
         );
       case 'projects':
         return (
@@ -137,6 +109,82 @@ export const App = () => {
   };
 
   return (
+    <>
+      <AppHeader
+        activeView={activeView}
+        onSearchClick={() => handleModalOpen('search')}
+      />
+      <main className="flex-1 overflow-auto p-8 pt-6">
+        {renderMainContent()}
+      </main>
+    </>
+  );
+};
+
+export const App = () => {
+  const store = useCreateStore(() => {
+    // Create the TinyBase Store and initialize the Store's data
+
+    //OPP: tinybase jsonschema
+    const store = createStore().setTablesSchema({
+      project: {
+        id: {type: 'string', default: ''},
+        name: {type: 'string', default: ''},
+        description: {type: 'string', default: ''},
+      },
+      issue: {
+        id: {type: 'string', default: ''},
+        title: {type: 'string', default: ''},
+        // description: {type: 'string', default: ''},
+        status: {type: 'string', default: 'Backlog'},
+        priority: {type: 'number', default: 0},
+        // assignee: {type: 'string', default: ''},
+        projectId: {type: 'string', default: ''},
+        createdAt: {type: 'string', default: ''},
+        // updatedAt: {type: 'string', default: ''},
+      },
+    }) as any;
+
+    // Generate random issues
+    generateRandomIssues(store);
+
+    return store;
+  });
+
+  store.setRow('project', '0', {
+    id: '0',
+    name: 'Issue Tracker',
+    description: 'Default project for issue tracking',
+  });
+
+  store.setRow('project', '1', {
+    id: '1',
+    name: 'Linear Clone',
+    description: 'Clone of Linear issue tracking',
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [activeView, setActiveView] = useState('issues');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [showNewIssue, setShowNewIssue] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [showSearch, setShowSearch] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleViewChange = (view: string) => {
+    setActiveView(view);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleModalOpen = (modal: string) => {
+    if (modal === 'new-issue') {
+      setShowNewIssue(true);
+    } else if (modal === 'search') {
+      setShowSearch(true);
+    }
+  };
+
+  return (
     <StrictMode>
       <ThemeProvider defaultTheme="system" storageKey="issue-tracker-theme">
         <Provider store={store}>
@@ -146,16 +194,11 @@ export const App = () => {
                 activeView={activeView}
                 onViewChange={handleViewChange}
                 onModalOpen={handleModalOpen}
+                collapsible="icon"
               />
-              <div className="flex flex-col flex-1">
-                <AppHeader
-                  activeView={activeView}
-                  onSearchClick={() => setShowSearch(true)}
-                />
-                <main className="flex-1 space-y-4 p-8 pt-6">
-                  {renderMainContent()}
-                </main>
-              </div>
+              <MainContent
+                onModalOpen={handleModalOpen}
+              />
             </SidebarInset>
 
             <NewIssueModal

@@ -1,5 +1,6 @@
 
 import { useTheme } from '../hooks/use-theme';
+import { useRowCount } from 'tinybase/ui-react';
 import {
   Archive,
   Eye,
@@ -44,6 +45,7 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { Badge } from './ui/badge';
+import { IssueForm } from '../IssueForm';
 
 // Navigation items
 const navigationItems = [
@@ -59,11 +61,14 @@ interface AppSidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   onModalOpen: (modal: string) => void;
+  collapsible?: "offcanvas" | "icon" | "none";
 }
 
-export function AppSidebar({ activeView, onViewChange, onModalOpen }: AppSidebarProps) {
+export function AppSidebar({ activeView, onViewChange, onModalOpen, collapsible = "icon" }: AppSidebarProps) {
+  const issueCount = useRowCount('issue');
+
   return (
-    <Sidebar>
+    <Sidebar collapsible={collapsible}>
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-4 py-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -96,7 +101,7 @@ export function AppSidebar({ activeView, onViewChange, onModalOpen }: AppSidebar
                 <span>{item.label}</span>
                 {item.id === 'issues' && (
                   <Badge variant="secondary" className="ml-auto text-xs">
-                    12
+                    {issueCount}
                   </Badge>
                 )}
               </SidebarMenuButton>
@@ -249,7 +254,7 @@ interface NewIssueModalProps {
 export function NewIssueModal({ open, onOpenChange }: NewIssueModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Issue</DialogTitle>
           <DialogDescription>
@@ -257,9 +262,7 @@ export function NewIssueModal({ open, onOpenChange }: NewIssueModalProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          <p className="text-sm text-muted-foreground">
-            Modal content will be implemented with the IssueForm component.
-          </p>
+          <IssueForm />
         </div>
       </DialogContent>
     </Dialog>
