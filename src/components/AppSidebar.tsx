@@ -1,22 +1,41 @@
-
-import { useTheme } from '../hooks/use-theme';
-import { useRowCount } from 'tinybase/ui-react';
+import {useState} from 'react';
 import {
   Archive,
+  ChevronRight,
   Eye,
   Folder,
   List,
+  LogOut,
+  Monitor,
+  Moon,
   Plus,
   Search,
   Settings,
-  User,
-  LogOut,
   Sun,
-  Moon,
-  Monitor,
-  ChevronRight
+  User,
 } from 'lucide-react';
+import {useRowCount} from 'tinybase/ui-react';
+import {useTheme} from '../hooks/use-theme';
 
+import {IssueForm} from '../IssueForm';
+import {Avatar, AvatarFallback} from './ui/avatar';
+import {Badge} from './ui/badge';
+import {Button} from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import {Input} from './ui/input';
 import {
   Sidebar,
   SidebarContent,
@@ -27,44 +46,54 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from './ui/sidebar';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
-import { Badge } from './ui/badge';
-import { IssueForm } from '../IssueForm';
 
 // Navigation items
 const navigationItems = [
-  { id: 'new-issue', label: 'New Issue', icon: Plus, action: 'modal', modal: 'new-issue' },
-  { id: 'search', label: 'Search', icon: Search, action: 'modal', modal: 'search' },
-  { id: 'views', label: 'Views', icon: Eye, action: 'view', view: 'views' },
-  { id: 'issues', label: 'Issues', icon: List, action: 'view', view: 'issues' },
-  { id: 'projects', label: 'Projects', icon: Folder, action: 'view', view: 'projects' },
-  { id: 'archives', label: 'Archives', icon: Archive, action: 'view', view: 'archives' },
+  {
+    id: 'new-issue',
+    label: 'New Issue',
+    icon: Plus,
+    action: 'modal',
+    modal: 'new-issue',
+  },
+  {
+    id: 'search',
+    label: 'Search',
+    icon: Search,
+    action: 'modal',
+    modal: 'search',
+  },
+  {id: 'views', label: 'Views', icon: Eye, action: 'view', view: 'views'},
+  {id: 'issues', label: 'Issues', icon: List, action: 'view', view: 'issues'},
+  {
+    id: 'projects',
+    label: 'Projects',
+    icon: Folder,
+    action: 'view',
+    view: 'projects',
+  },
+  {
+    id: 'archives',
+    label: 'Archives',
+    icon: Archive,
+    action: 'view',
+    view: 'archives',
+  },
 ];
 
 interface AppSidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   onModalOpen: (modal: string) => void;
-  collapsible?: "offcanvas" | "icon" | "none";
+  collapsible?: 'offcanvas' | 'icon' | 'none';
 }
 
-export function AppSidebar({ activeView, onViewChange, onModalOpen, collapsible = "icon" }: AppSidebarProps) {
+export function AppSidebar({
+  activeView,
+  onViewChange,
+  onModalOpen,
+  collapsible = 'icon',
+}: AppSidebarProps) {
   const issueCount = useRowCount('issue');
 
   return (
@@ -76,7 +105,9 @@ export function AppSidebar({ activeView, onViewChange, onModalOpen, collapsible 
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">Issue Tracker</span>
-            <span className="text-xs text-muted-foreground">Project Management</span>
+            <span className="text-xs text-muted-foreground">
+              Project Management
+            </span>
           </div>
         </div>
       </SidebarHeader>
@@ -150,7 +181,7 @@ function UserMenu() {
 }
 
 function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const {setTheme} = useTheme();
 
   return (
     <>
@@ -175,14 +206,19 @@ interface AppHeaderProps {
   onSearchClick: () => void;
 }
 
-export function AppHeader({ activeView, onSearchClick }: AppHeaderProps) {
+export function AppHeader({activeView, onSearchClick}: AppHeaderProps) {
   const getBreadcrumbText = () => {
     switch (activeView) {
-      case 'issues': return 'Issues';
-      case 'projects': return 'Projects';
-      case 'views': return 'Views';
-      case 'archives': return 'Archives';
-      default: return 'Issues';
+      case 'issues':
+        return 'Issues';
+      case 'projects':
+        return 'Projects';
+      case 'views':
+        return 'Views';
+      case 'archives':
+        return 'Archives';
+      default:
+        return 'Issues';
     }
   };
 
@@ -195,7 +231,9 @@ export function AppHeader({ activeView, onSearchClick }: AppHeaderProps) {
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <span>Issue Tracker</span>
           <ChevronRight className="h-3 w-3" />
-          <span className="font-medium text-foreground">{getBreadcrumbText()}</span>
+          <span className="font-medium text-foreground">
+            {getBreadcrumbText()}
+          </span>
         </div>
 
         {/* Large Search Bar */}
@@ -251,7 +289,7 @@ interface NewIssueModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function NewIssueModal({ open, onOpenChange }: NewIssueModalProps) {
+export function NewIssueModal({open, onOpenChange}: NewIssueModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -272,24 +310,119 @@ export function NewIssueModal({ open, onOpenChange }: NewIssueModalProps) {
 interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSearch: (criteria: {title?: string; status?: string; priority?: number}) => void;
 }
 
-export function SearchModal({ open, onOpenChange }: SearchModalProps) {
+export function SearchModal({
+  open,
+  onOpenChange,
+  onSearch
+}: SearchModalProps) {
+  const [title, setTitle] = useState('');
+  const [status, setStatus] = useState('');
+  const [priority, setPriority] = useState('');
+
+  const handleSearch = () => {
+    onSearch({
+      title: title.trim(),
+      status: status || undefined,
+      priority: priority ? Number(priority) : undefined,
+    });
+    onOpenChange(false);
+  };
+
+  const handleClear = () => {
+    setTitle('');
+    setStatus('');
+    setPriority('');
+    onSearch({});
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Advanced Search</DialogTitle>
           <DialogDescription>
-            Search through issues, projects, and comments with advanced filters.
+            Search through issues with advanced filters.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          <p className="text-sm text-muted-foreground">
-            Advanced search functionality will be implemented here.
-          </p>
+        <div className="space-y-6 py-4">
+          <div className="space-y-2">
+            <label htmlFor="search-title" className="text-sm font-medium text-foreground">
+              Issue Title
+            </label>
+            <Input
+              id="search-title"
+              type="text"
+              placeholder="Search by title..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="search-status" className="text-sm font-medium text-foreground">
+                Status
+              </label>
+              <select
+                id="search-status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">All Statuses</option>
+                <option value="Backlog">Backlog</option>
+                <option value="Todo">Todo</option>
+                <option value="InProgress">In Progress</option>
+                <option value="Done">Done</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="search-priority" className="text-sm font-medium text-foreground">
+                Priority
+              </label>
+              <select
+                id="search-priority"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">All Priorities</option>
+                <option value="0">None</option>
+                <option value="1">Low</option>
+                <option value="2">Medium</option>
+                <option value="3">High</option>
+                <option value="4">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button onClick={handleSearch}>
+              Search
+            </Button>
+            <Button type="button" variant="outline" onClick={handleClear}>
+              Clear Filters
+            </Button>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            Press Enter in the title field or click "Search" to filter issues
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+

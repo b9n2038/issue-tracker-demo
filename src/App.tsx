@@ -1,59 +1,98 @@
-import {StrictMode, useState} from 'react';
-import {Provider, useCreateStore} from 'tinybase/ui-react';
-import {createStore} from 'tinybase/with-schemas';
+ import {StrictMode, useMemo, useState} from 'react';
+ import {Provider, useCreateStore, useTable} from 'tinybase/ui-react';
+import {createIndexes, createStore} from 'tinybase/with-schemas';
+import {
+  AppHeader,
+  AppSidebar,
+  NewIssueModal,
+  SearchModal,
+} from './components/AppSidebar';
 import {DataTable} from './components/DataTable';
-import {AppSidebar, AppHeader, NewIssueModal, SearchModal} from './components/AppSidebar';
-import {SidebarProvider, SidebarInset, useSidebar} from './components/ui/sidebar';
-import {ThemeProvider} from './hooks/use-theme';
+import {SidebarInset, SidebarProvider} from './components/ui/sidebar';
 import {IssueState} from './generated/IssueTracker';
+import {ThemeProvider} from './hooks/use-theme';
 
 // Generate random issues for demo purposes
 const generateRandomIssues = (store: any) => {
-  const statuses = [IssueState.Backlog, IssueState.Todo, IssueState.InProgress, IssueState.Done, IssueState.Cancelled];
+  const statuses = [
+    IssueState.Backlog,
+    IssueState.Todo,
+    IssueState.InProgress,
+    IssueState.Done,
+    IssueState.Cancelled,
+  ];
   const priorities = [0, 1, 2, 3, 4]; // 0-4
   const titles = [
-    'Implement user authentication', 'Fix responsive design on mobile', 'Add dark mode support',
-    'Optimize database queries', 'Create API documentation', 'Setup CI/CD pipeline',
-    'Implement search functionality', 'Add unit tests', 'Refactor legacy code',
-    'Improve error handling', 'Add data validation', 'Create user dashboard',
-    'Implement notification system', 'Add file upload feature', 'Create admin panel',
-    'Optimize bundle size', 'Add accessibility features', 'Implement caching',
-    'Create data export functionality', 'Add real-time updates', 'Implement pagination',
-    'Add drag and drop support', 'Create user onboarding', 'Implement multi-language support',
-    'Add keyboard shortcuts', 'Create custom themes'
+    'Implement user authentication',
+    'Fix responsive design on mobile',
+    'Add dark mode support',
+    'Optimize database queries',
+    'Create API documentation',
+    'Setup CI/CD pipeline',
+    'Implement search functionality',
+    'Add unit tests',
+    'Refactor legacy code',
+    'Improve error handling',
+    'Add data validation',
+    'Create user dashboard',
+    'Implement notification system',
+    'Add file upload feature',
+    'Create admin panel',
+    'Optimize bundle size',
+    'Add accessibility features',
+    'Implement caching',
+    'Create data export functionality',
+    'Add real-time updates',
+    'Implement pagination',
+    'Add drag and drop support',
+    'Create user onboarding',
+    'Implement multi-language support',
+    'Add keyboard shortcuts',
+    'Create custom themes',
   ];
 
   for (let i = 0; i < 25; i++) {
     const randomTitle = titles[Math.floor(Math.random() * titles.length)];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-    const randomPriority = priorities[Math.floor(Math.random() * priorities.length)];
+    const randomPriority =
+      priorities[Math.floor(Math.random() * priorities.length)];
 
     store.setRow('issue', `issue-${i + 1}`, {
       title: `${randomTitle} ${i + 1}`,
       status: randomStatus,
       priority: randomPriority,
       projectId: '0', // Default to first project
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last 30 days
+      createdAt: new Date(
+        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+      ).toISOString(), // Random date within last 30 days
     });
   }
 };
 
-const MainContent = ({ onModalOpen }: { onModalOpen: (modal: string) => void }) => {
-  const { state } = useSidebar();
-  const [activeView, setActiveView] = useState('issues');
-  const [showNewIssue, setShowNewIssue] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+const MainContent = ({onModalOpen, searchCriteria}: {onModalOpen: (modal: string) => void; searchCriteria: {title: string; status?: string; priority?: number}}) => {
+  const [activeView] = useState('issues');
 
-  const handleViewChange = (view: string) => {
-    setActiveView(view);
-  };
+  // Get all issues
+  const issues = useTable('issue');
+
+  // Filter issues based on search criteria
+  const filteredIssues = useMemo(() => {
+    let filtered = Object.keys(issues);
+    if (searchCriteria.title) {
+      filtered = filtered.filter(id =>
+        String(issues[id]?.title || '').toLowerCase().includes(searchCriteria.title.toLowerCase())
+      );
+    }
+    if (searchCriteria.status) {
+      filtered = filtered.filter(id => issues[id]?.status === searchCriteria.status);
+    }
+    if (searchCriteria.priority !== undefined) {
+      filtered = filtered.filter(id => issues[id]?.priority === searchCriteria.priority);
+    }
+    return filtered;
+  }, [issues, searchCriteria]);
 
   const handleModalOpen = (modal: string) => {
-    if (modal === 'new-issue') {
-      setShowNewIssue(true);
-    } else if (modal === 'search') {
-      setShowSearch(true);
-    }
     onModalOpen(modal);
   };
 
@@ -64,11 +103,14 @@ const MainContent = ({ onModalOpen }: { onModalOpen: (modal: string) => void }) 
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">Issues</h2>
             <div className="bg-card rounded-lg border p-6">
-              <DataTable
-                tableId="issue"
-                cellId="title"
-                defaultPageSize={5}
-              />
+               <DataTable
+                 tableId="issue"
+                 cellId="title"
+                 defaultPageSize={5}
+                 {...(filteredIssues.length > 0
+                   ? {filteredRowIds: filteredIssues}
+                   : {})}
+               />
             </div>
           </section>
         );
@@ -77,29 +119,33 @@ const MainContent = ({ onModalOpen }: { onModalOpen: (modal: string) => void }) 
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">Projects</h2>
             <div className="bg-card rounded-lg border p-6">
-              <DataTable
-                tableId="project"
-                cellId="title"
-                defaultPageSize={5}
-              />
+              <DataTable tableId="project" cellId="title" defaultPageSize={5} />
             </div>
           </section>
         );
       case 'views':
         return (
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">Issue Views</h2>
+            <h2 className="text-2xl font-semibold text-foreground">
+              Issue Views
+            </h2>
             <div className="bg-card rounded-lg border p-6">
-              <p className="text-muted-foreground">View management will be implemented here.</p>
+              <p className="text-muted-foreground">
+                View management will be implemented here.
+              </p>
             </div>
           </section>
         );
       case 'archives':
         return (
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">Archived Issues</h2>
+            <h2 className="text-2xl font-semibold text-foreground">
+              Archived Issues
+            </h2>
             <div className="bg-card rounded-lg border p-6">
-              <p className="text-muted-foreground">Archived Done/Cancelled issues will be displayed here.</p>
+              <p className="text-muted-foreground">
+                Archived Done/Cancelled issues will be displayed here.
+              </p>
             </div>
           </section>
         );
@@ -145,10 +191,38 @@ export const App = () => {
       },
     }) as any;
 
+    const indexes = createIndexes(store);
+    indexes.setIndexDefinition(
+      'byStatus', // indexId
+      'issue', //      tableId to index
+      'status', //    cellId to index on
+    );
+    indexes.setIndexDefinition(
+      'byPriority', // indexId
+      'issue', //      tableId to index
+      'priority', //    cellId to index on
+    );
+    indexes.setIndexDefinition(
+      'byTitle', // indexId
+      'issue', //      tableId to index
+      'title', //    cellId to index on
+    );
+
     // Generate random issues
     generateRandomIssues(store);
 
     return store;
+  });
+
+  // State for search criteria
+  const [searchCriteria, setSearchCriteria] = useState<{
+    title: string;
+    status?: string;
+    priority?: number;
+  }>({
+    title: '',
+    status: undefined,
+    priority: undefined,
   });
 
   store.setRow('project', '0', {
@@ -163,19 +237,27 @@ export const App = () => {
     description: 'Clone of Linear issue tracking',
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeView, setActiveView] = useState('issues');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showNewIssue, setShowNewIssue] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showSearch, setShowSearch] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleViewChange = (view: string) => {
     setActiveView(view);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSearch = (criteria: {
+    title?: string;
+    status?: string;
+    priority?: number;
+  }) => {
+    console.log('search with', criteria);
+    setSearchCriteria({
+      title: criteria.title || '',
+      status: criteria.status,
+      priority: criteria.priority,
+    });
+  };
+
   const handleModalOpen = (modal: string) => {
     if (modal === 'new-issue') {
       setShowNewIssue(true);
@@ -183,7 +265,6 @@ export const App = () => {
       setShowSearch(true);
     }
   };
-
   return (
     <StrictMode>
       <ThemeProvider defaultTheme="system" storageKey="issue-tracker-theme">
@@ -196,18 +277,14 @@ export const App = () => {
                 onModalOpen={handleModalOpen}
                 collapsible="icon"
               />
-              <MainContent
-                onModalOpen={handleModalOpen}
-              />
+               <MainContent onModalOpen={handleModalOpen} searchCriteria={searchCriteria} />
             </SidebarInset>
 
-            <NewIssueModal
-              open={showNewIssue}
-              onOpenChange={setShowNewIssue}
-            />
+            <NewIssueModal open={showNewIssue} onOpenChange={setShowNewIssue} />
             <SearchModal
               open={showSearch}
               onOpenChange={setShowSearch}
+              onSearch={handleSearch}
             />
           </SidebarProvider>
         </Provider>

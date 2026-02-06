@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRowCount, useSortedRowIds, useTable } from 'tinybase/ui-react';
+import { useSortedRowIds, useTable } from 'tinybase/ui-react';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
@@ -9,21 +9,32 @@ interface DataTableProps {
   cellId: string;
   defaultPageSize?: number;
   pageSizeOptions?: number[];
+  filteredRowIds?: string[];
 }
 
 export function DataTable({
   tableId,
   cellId,
   defaultPageSize = 10,
-  pageSizeOptions = [5, 10, 20, 50, 100]
+  pageSizeOptions = [5, 10, 20, 50, 100],
+  filteredRowIds
 }: DataTableProps) {
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get data from Tinybase
   const table = useTable(tableId);
-  const totalRows = useRowCount(tableId);
-  const sortedRowIds = useSortedRowIds(tableId, cellId, false, (currentPage - 1) * pageSize, pageSize);
+  const allRowIds = useSortedRowIds(tableId, cellId, false);
+
+  // Use filtered row IDs if provided, otherwise use all rows
+  const rowIdsToUse = filteredRowIds || allRowIds;
+  const totalRows = rowIdsToUse.length;
+
+  // Paginate the filtered/sorted row IDs
+  const paginatedRowIds = rowIdsToUse.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   // Calculate pagination info
   const totalPages = Math.ceil(totalRows / pageSize);
@@ -58,17 +69,17 @@ export function DataTable({
               ))}
             </tr>
           </thead>
-          <tbody>
-            {sortedRowIds.map((rowId) => (
-              <tr key={rowId} className="border-b">
-                {columns.map((column) => (
-                  <td key={column} className="p-4 align-middle">
-                    {table[rowId]?.[column] || ''}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
+           <tbody>
+             {paginatedRowIds.map((rowId) => (
+               <tr key={rowId} className="border-b">
+                 {columns.map((column) => (
+                   <td key={column} className="p-4 align-middle">
+                     {table[rowId]?.[column] || ''}
+                   </td>
+                 ))}
+               </tr>
+             ))}
+           </tbody>
         </table>
       </div>
 
