@@ -155,15 +155,15 @@ const MainContent = ({onModalOpen, searchCriteria}: {onModalOpen: (modal: string
   };
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <AppHeader
         activeView={activeView}
         onSearchClick={() => handleModalOpen('search')}
       />
-      <main className="flex-1 overflow-auto p-8 pt-6">
+      <main className="flex-1 overflow-auto p-8 pt-14">
         {renderMainContent()}
       </main>
-    </>
+    </div>
   );
 };
 
